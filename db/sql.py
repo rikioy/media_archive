@@ -1,8 +1,12 @@
 import sqlite3
-import logging
+import os
+import time
+from util.log import Log
+from util.path import app_path
+log = Log()
 
 
-class Sql:
+class Album:
     conn = None
     album_table = 'album'
 
@@ -10,20 +14,17 @@ class Sql:
         self.conn = sqlite3.connect(db)
         c = self.conn.cursor()
         c.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name=?;", (self.album_table,))
-        if c.fetchone()[0]==1 :
-            logging.debug("table exists.")
-            print("a")
+        if c.fetchone()[0] == 1:
+            pass
         else:
-            logging.info("not table")
+            log.info("create album table")
             self.create_album()
-            print("b")
         c.close()
-
 
     def create_album(self):
         sql = '''
         CREATE TABLE album (
-            id int PRIMARY KEY NOT NULL,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             filename TEXT NOT NULL,
             md5 TEXT NOT NULL,
             comment TEXT,
@@ -40,13 +41,27 @@ class Sql:
         self.conn.commit()
         cur.close
 
+    def insert(self, task):
+        sql = '''INSERT INTO album(filename, md5, comment, media_dt, media_year, media_mon, media_day, created_at,
+                updated_at) VALUES(?,?,?,?,?,?,?,?,?)'''
+        created_at = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+        cur = self.conn.cursor()
+        task = task + (created_at, created_at)
+        cur.execute(sql, task)
+        self.conn.commit()
+        return cur.lastrowid
 
-    def insert(self):
-        print('insert record')
-
-    def check(self):
-        print('check exists')
+    def md5_exists(self, md5):
+        sql = '''SELECT * FROM album WHERE md5=?'''
+        cur = self.conn.cursor()
+        cur.execute(sql, md5)
+        if cur.fetchone() is None:
+            return False
+        else:
+            return True
 
 
 if __name__ == "__main__":
-    db = Sql('d:/test.db')
+    a = Album(os.path.join(app_path(), 'test.db'))
+    id = a.insert(("a", "a", "a", "a", "a", "a", "a"))
+    print(a.md5_exists('b'))

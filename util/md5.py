@@ -1,5 +1,6 @@
 import hashlib
 import os
+from util.log import Log
 
 
 def md5file(path, size=5000000):
@@ -25,5 +26,8 @@ def md5str(s_md5):
 
 
 if __name__ == '__main__':
+    log = Log()
+    log.debug("testlog")
+
     print(md5file('d:/v1.mp4'))
     print(md5str("aaa"))
