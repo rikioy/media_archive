@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import exifread
 from dateutil.parser import parse
+import datetime
 
 
 def exif(path):
@@ -11,9 +12,12 @@ def exif(path):
 
 def exif_time(path):
     ex = exif(path)
-    dtstr = ex['EXIF DateTimeOriginal']
-    dt = parse(dtstr.values)
-    return dt
+    dtstr = ex.get('Image DateTime')
+    if dtstr is None:
+        return None
+    else:
+        dt = datetime.datetime.strptime(dtstr.values, "%Y:%m:%d %H:%M:%S")
+        return dt
 
 
 if __name__ == '__main__':

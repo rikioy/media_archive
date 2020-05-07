@@ -5,8 +5,11 @@ import ffmpeg
 
 def meta_time(path):
     m = meta(path)
+    print(m)
     dtstr = m['format']['tags']['creation_time']
     dt = parse(dtstr)
+    print(dt.local)
+    #dt = None
     return dt
 
 def meta(path):
