@@ -10,7 +10,8 @@ class Album:
     conn = None
     album_table = 'album'
 
-    def __init__(self, db):
+    def __init__(self, path):
+        db = os.path.join(path, 'album.db')
         self.conn = sqlite3.connect(db)
         c = self.conn.cursor()
         c.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name=?;", (self.album_table,))
@@ -44,7 +45,7 @@ class Album:
     def insert(self, task):
         sql = '''INSERT INTO album(filename, md5, comment, media_dt, media_year, media_mon, media_day, created_at,
                 updated_at) VALUES(?,?,?,?,?,?,?,?,?)'''
-        created_at = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+        created_at = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         cur = self.conn.cursor()
         task = task + (created_at, created_at)
         cur.execute(sql, task)
@@ -54,7 +55,7 @@ class Album:
     def md5_exists(self, md5):
         sql = '''SELECT * FROM album WHERE md5=?'''
         cur = self.conn.cursor()
-        cur.execute(sql, md5)
+        cur.execute(sql, (md5,))
         if cur.fetchone() is None:
             return False
         else:

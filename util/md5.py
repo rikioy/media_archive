@@ -4,7 +4,6 @@ from util.log import Log
 
 
 def md5file(path, size=5000000):
-    print(size)
     stat = os.stat(path)
     data = b''
     f = open(path, 'rb')

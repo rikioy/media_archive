@@ -2,6 +2,7 @@
 import exifread
 from dateutil.parser import parse
 import datetime
+from dateutil import tz
 
 
 def exif(path):
@@ -17,6 +18,7 @@ def exif_time(path):
         return None
     else:
         dt = datetime.datetime.strptime(dtstr.values, "%Y:%m:%d %H:%M:%S")
+        dt = dt.astimezone(tz.tzlocal())
         return dt
 
 
