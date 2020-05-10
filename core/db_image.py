@@ -66,6 +66,6 @@ class Image:
 
 
 if __name__ == "__main__":
-    a = Album(os.path.join(app_path(), 'test.db'))
+    a = Image(os.path.join(app_path(), 'test.db'))
     id = a.insert(("a", "a", "a", "a", "a", "a", "a"))
     print(a.md5_exists('b'))
