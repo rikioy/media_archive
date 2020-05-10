@@ -61,7 +61,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.srcBtn.setText(_translate("MainWindow", "PushButton"))
-        self.runBtn.setText(_translate("MainWindow", "PushButton"))
-        self.dstBtn.setText(_translate("MainWindow", "PushButton"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "相片归档器"))
+        self.srcBtn.setText(_translate("MainWindow", "来源文件夹"))
+        self.runBtn.setText(_translate("MainWindow", "开始"))
+        self.dstBtn.setText(_translate("MainWindow", "目标文件夹"))

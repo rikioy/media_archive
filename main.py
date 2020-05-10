@@ -1,6 +1,6 @@
 import sys
 import os
-from core.sql import Album
+from core.db_image import Image
 from util.md5 import md5file
 from core.dir import mkdir_by_date, copyfile
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
@@ -13,6 +13,7 @@ from media.media import meta_time
 
 class MyThread(QThread):
     signal = pyqtSignal(str)
+    psignal = pyqtSignal(int)
 
     def __init__(self, src, dst):
         super(MyThread, self).__init__()
@@ -20,23 +21,36 @@ class MyThread(QThread):
         self.dst = dst
 
     def run(self):
-        db = Album(self.dst)
+        db = Image(self.dst)
         filelist = walk(self.src)
-        self.signal.emit("total:" + str(len(filelist)))
-
+        succ_count = 0
+        total_count = len(filelist)
+        img_count = 0
+        video_count = 0
+        skip_count = 0
         for f in filelist:
             dt = None
             if f[2].lower() in ['.jpg', '.bmp', '.jpeg', '.png']:
+                img_count += 1
                 dt = exif_time(f[0])
             elif f[2].lower() in ['.mp4', '.mov']:
+                video_count += 1
                 dt = meta_time(f[0])
             if dt is not None:
-                self.signal.emit(f[0] + ":" + dt.strftime("%Y-%m-%d %H:%M:%S"))
+                self.signal.emit(f[0] + " 处理中...")
                 dst_path = mkdir_by_date(self.dst, dt)
                 md5 = md5file(f[0])
                 if db.md5_exists(md5) is False:
                     copyfile(f[0], dst_path, f[1], f[2])
                     db.insert((f[1] + f[2], md5, '', dt.strftime("%Y-%m-%d %H:%M:%S"), dt.year, dt.month, dt.day))
+                else:
+                    skip_count += 1
+            succ_count = succ_count + 1
+            bar_count = int(succ_count/total_count*100)
+            self.psignal.emit(bar_count)
+        end_msg = '总计: {}, 图片: {}, 视频: {}, 略过: {}'.format(total_count, img_count, video_count, skip_count)
+        self.signal.emit(end_msg)
+        db.close()
 
 
 class MyWindow(QMainWindow, Ui_MainWindow):
@@ -60,6 +74,9 @@ class MyWindow(QMainWindow, Ui_MainWindow):
     def setLog(self, msg):
         self.tBro.append(msg)
 
+    def upPBar(self, count):
+        self.pBar.setValue(count)
+
     def run(self):
         self.setLog("run")
         src = self.srcEdit.text()
@@ -67,8 +84,13 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.setLog(src)
         self.setLog(dst)
 
-        src = 'd:/src'
-        dst = 'd:/dst'
+        if src == '':
+            src = '/Users/fuqingrong/Downloads/src'
+        if dst == '':
+            dst = '/Users/fuqingrong/Downloads/dst'
+
+        #src = 'd:/src'
+        #dst = 'd:/dst'
 
         if os.path.exists(src) is False:
             QMessageBox.information(self, '提示', '来源文件夹{}不存在'.format(src), QMessageBox.Yes)
@@ -78,6 +100,7 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             return
         self.my_thread = MyThread(src, dst)
         self.my_thread.signal.connect(self.setLog)
+        self.my_thread.psignal.connect(self.upPBar)
         self.my_thread.start()
 
 
