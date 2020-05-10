@@ -10,6 +10,8 @@ exifread = "*"
 python-dateutil = "*"
 ffmpeg-python = "*"
 pyqt5 = "*"
+flask = "*"
+gevent = "*"
 
 [requires]
 python_version = "3.7"
